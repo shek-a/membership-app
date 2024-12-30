@@ -21,14 +21,14 @@ func TestCreateMember(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name: "success creating new member",
+			name: "Success creating new member",
 			mongoDbMock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateSuccessResponse())
 			},
 			wantErr: false,
 		},
 		{
-			name: "error creating new member",
+			name: "Error creating new member",
 			mongoDbMock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateWriteErrorsResponse(mtest.WriteError{
 					Index:   0,
@@ -81,7 +81,7 @@ func TestGetMemberById(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name: "success getting member by id",
+			name: "Success getting member by id",
 			mongoDbMock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateCursorResponse(1, "membership.members", mtest.FirstBatch, bson.D{
 					{Key: "ID", Value: member.ID},
@@ -133,7 +133,7 @@ func TestGetAllMembers(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name: "success getting all members",
+			name: "Success getting all members",
 			mongoDbMock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateCursorResponse(2, "membership.members", mtest.FirstBatch, bson.D{
 					{Key: "ID", Value: 1},
@@ -213,14 +213,14 @@ func TestUpdateMemberById(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name: "success updating existing member",
+			name: "Success updating existing member",
 			mongoDbMock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateSuccessResponse())
 			},
 			wantErr: false,
 		},
 		{
-			name: "update non-existing member",
+			name: "Update non-existing member",
 			mongoDbMock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateCommandErrorResponse(mtest.CommandError{
 					Code:    11000,
@@ -257,14 +257,14 @@ func TestDeleteMemberByID(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name: "success deleting existing member",
+			name: "Success deleting existing member",
 			mongoDbMock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateSuccessResponse())
 			},
 			wantErr: false,
 		},
 		{
-			name: "delete non-existing member",
+			name: "Delete non-existing member",
 			mongoDbMock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateWriteErrorsResponse(mtest.WriteError{
 					Index:   0,

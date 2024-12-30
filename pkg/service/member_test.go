@@ -33,7 +33,7 @@ func TestCreateMember(t *testing.T) {
 		expectedBody       any
 	}{
 		{
-			name:         "success creating new member",
+			name:         "Success creating new member",
 			createMember: member,
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("CreateMember", ctx, member).Return(nil)
@@ -42,7 +42,7 @@ func TestCreateMember(t *testing.T) {
 			expectedBody:       member,
 		},
 		{
-			name:         "error creating new member",
+			name:         "Error creating new member",
 			createMember: member,
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("CreateMember", ctx, member).Return(errors.New("repository error"))
@@ -51,7 +51,7 @@ func TestCreateMember(t *testing.T) {
 			expectedBody:       models.ErrorMessage{Error: "Error creating member"},
 		},
 		{
-			name: "invalid email",
+			name: "Invalid email",
 			createMember: &models.Member{
 				FirstName:   "John",
 				LastName:    "Doe",
@@ -64,7 +64,7 @@ func TestCreateMember(t *testing.T) {
 			expectedBody:       models.ErrorMessage{Error: "Invalid email"},
 		},
 		{
-			name: "invalid date of birth",
+			name: "Invalid date of birth",
 			createMember: &models.Member{
 				FirstName:   "John",
 				LastName:    "Doe",
@@ -113,7 +113,7 @@ func TestGetMemberById(t *testing.T) {
 		expectedBody       any
 	}{
 		{
-			name: "success getting member by id",
+			name: "Success getting member by id",
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(member, nil)
 			},
@@ -121,7 +121,7 @@ func TestGetMemberById(t *testing.T) {
 			expectedBody:       member,
 		},
 		{
-			name: "member is not found",
+			name: "Member is not found",
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(nil, mongo.ErrNoDocuments)
 			},
@@ -129,7 +129,7 @@ func TestGetMemberById(t *testing.T) {
 			expectedBody:       models.ErrorMessage{Error: "Member 1 not found"},
 		},
 		{
-			name: "error getting member by id",
+			name: "Error getting member by id",
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(nil, errors.New("repository error"))
 			},
@@ -181,7 +181,7 @@ func TestGetAllMembers(t *testing.T) {
 		expectedBody       any
 	}{
 		{
-			name: "success getting all members",
+			name: "Success getting all members",
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetAllMembers", ctx).Return(members, nil)
 			},
@@ -189,7 +189,7 @@ func TestGetAllMembers(t *testing.T) {
 			expectedBody:       members,
 		},
 		{
-			name: "error getting all members",
+			name: "Error getting all members",
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetAllMembers", ctx).Return(nil, errors.New("repository error"))
 			},
@@ -239,7 +239,7 @@ func TestUpdateMemberById(t *testing.T) {
 		wantErr            bool
 	}{
 		{
-			name:         "success updating member by id",
+			name:         "Success updating member by id",
 			updateMember: updateMember,
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(member, nil)
@@ -249,7 +249,7 @@ func TestUpdateMemberById(t *testing.T) {
 			wantErr:            false,
 		},
 		{
-			name:         "member is not found",
+			name:         "Member is not found",
 			updateMember: updateMember,
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(nil, mongo.ErrNoDocuments)
@@ -259,7 +259,7 @@ func TestUpdateMemberById(t *testing.T) {
 			wantErr:            true,
 		},
 		{
-			name:         "error getting member by id",
+			name:         "Error getting member by id",
 			updateMember: updateMember,
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(nil, errors.New("repository error"))
@@ -269,7 +269,7 @@ func TestUpdateMemberById(t *testing.T) {
 			wantErr:            true,
 		},
 		{
-			name:         "error updating member by id",
+			name:         "Error updating member by id",
 			updateMember: updateMember,
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(member, nil)
@@ -280,7 +280,7 @@ func TestUpdateMemberById(t *testing.T) {
 			wantErr:            true,
 		},
 		{
-			name: "invalid updated email",
+			name: "Invalid updated email",
 			updateMember: &models.UpdateMember{
 				Email: "Jonathan.Doegmail.com",
 			},
@@ -291,7 +291,7 @@ func TestUpdateMemberById(t *testing.T) {
 			wantErr:            true,
 		},
 		{
-			name: "invalid updated date of birth",
+			name: "Invalid updated date of birth",
 			updateMember: &models.UpdateMember{
 				DateOfBirth: "1990-01-01T00:00:00Z",
 			},
@@ -347,7 +347,7 @@ func TestDeleteMemberById(t *testing.T) {
 		expectedBody       any
 	}{
 		{
-			name: "success deleting existing member",
+			name: "Success deleting existing member",
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(member, nil)
 				mockRepo.On("DeleteMemberById", ctx, memberId).Return(nil)
@@ -356,7 +356,7 @@ func TestDeleteMemberById(t *testing.T) {
 			expectedBody:       nil,
 		},
 		{
-			name: "member is not found",
+			name: "Member is not found",
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(nil, mongo.ErrNoDocuments)
 			},
@@ -364,7 +364,7 @@ func TestDeleteMemberById(t *testing.T) {
 			expectedBody:       models.ErrorMessage{Error: "Member 1 not found"},
 		},
 		{
-			name: "error deleting existing member",
+			name: "Error deleting existing member",
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(member, nil)
 				mockRepo.On("DeleteMemberById", ctx, memberId).Return(errors.New("repository error"))

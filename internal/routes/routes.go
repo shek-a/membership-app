@@ -7,4 +7,6 @@ import (
 
 func RegisterRoutes(server *gin.Engine, handler handler.MemberHandlerI) {
 	server.POST("/member", handler.CreateMember)
+	server.GET("/member/:id", handler.GetMemberById)
+	server.GET("/members", handler.GetAllMembers)
 }

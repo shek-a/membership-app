@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -21,44 +20,140 @@ type MockMemberService struct {
 func TestCreateMember(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
-	ctx := context.Background()
 
 	member := &models.Member{
 		ID:          1,
 		FirstName:   "John",
 		LastName:    "Doe",
-		DateOfBirth: models.Date{Time: time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC)},
+		Email:       "John.Doe@gmail.com",
+		DateOfBirth: "1990-01-01",
 	}
 
 	mockService := new(MockMemberService)
-	mockService.On("CreateMember", ctx, mock.Anything).Return(createResponse(http.StatusOK, member))
+	mockService.On("CreateMember", mock.Anything, mock.Anything).Return(createResponse(http.StatusOK, member))
 
 	memberHandler := NewMemberHandler(router, mockService)
 	router.POST("/member", memberHandler.CreateMember)
 
-	t.Run("valid request", func(t *testing.T) {
-		body := `{"firstName": "John", "lastName": "Doe", "dateOfBirth": "1990-01-01"}`
-		req, _ := http.NewRequest(http.MethodPost, "/member", bytes.NewBufferString(body))
-		req.Header.Set("Content-Type", "application/json")
+	testCases := []struct {
+		name                 string
+		requestBody          string
+		expectedStatusCode   int
+		expectedResponseBody string
+	}{
+		{
+			name:                 "Success creating new member",
+			requestBody:          `{"firstName": "John", "lastName": "Doe", "email": "John.Doe@gmail.com", "dateOfBirth": "1990-01-01"}`,
+			expectedStatusCode:   http.StatusOK,
+			expectedResponseBody: "{\"id\":1,\"firstName\":\"John\",\"lastName\":\"Doe\",\"email\":\"John.Doe@gmail.com\",\"dateOfBirth\":\"1990-01-01\"}",
+		},
+		{
+			name:                 "Invalid request",
+			requestBody:          `{"firstName": "John", "lastName": "Doe", "dateOfBirth": "1990-01-01"}`,
+			expectedStatusCode:   http.StatusBadRequest,
+			expectedResponseBody: "{\"error\":\"Invalid request\"}",
+		},
+	}
 
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			request, _ := http.NewRequest(http.MethodPost, "/member", bytes.NewBufferString(tc.requestBody))
+			request.Header.Set("Content-Type", "application/json")
 
-		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Contains(t, w.Body.String(), "member created")
-	})
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, request)
 
-	t.Run("invalid request", func(t *testing.T) {
-		body := `{"name": "John Doe"}`
-		req, _ := http.NewRequest(http.MethodPost, "/member", bytes.NewBufferString(body))
-		req.Header.Set("Content-Type", "application/json")
+			assert.Equal(t, tc.expectedStatusCode, w.Code)
+			assert.Contains(t, w.Body.String(), tc.expectedResponseBody)
+		})
+	}
+}
 
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
+func TestGetMemberById(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
 
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Contains(t, w.Body.String(), "Invalid request")
-	})
+	member := &models.Member{
+		ID:          1,
+		FirstName:   "John",
+		LastName:    "Doe",
+		Email:       "John.Doe@gmail.com",
+		DateOfBirth: "1990-01-01",
+	}
+
+	mockService := new(MockMemberService)
+	mockService.On("GetMemberById", mock.Anything, 1).Return(createResponse(http.StatusOK, member))
+
+	memberHandler := NewMemberHandler(router, mockService)
+	router.GET("/member/:id", memberHandler.GetMemberById)
+
+	testCases := []struct {
+		name                 string
+		memberId             string
+		expectedStatusCode   int
+		expectedResponseBody string
+	}{
+		{
+			name:                 "Success getting member by id",
+			memberId:             "1",
+			expectedStatusCode:   http.StatusOK,
+			expectedResponseBody: "{\"id\":1,\"firstName\":\"John\",\"lastName\":\"Doe\",\"email\":\"John.Doe@gmail.com\",\"dateOfBirth\":\"1990-01-01\"}",
+		},
+		{
+			name:                 "Invalid member ID",
+			memberId:             "1x",
+			expectedStatusCode:   http.StatusBadRequest,
+			expectedResponseBody: "{\"error\":\"Invalid member ID\"}",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			request, _ := http.NewRequest(http.MethodGet, "/member/"+tc.memberId, nil)
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, request)
+
+			assert.Equal(t, tc.expectedStatusCode, w.Code)
+			assert.Contains(t, w.Body.String(), tc.expectedResponseBody)
+		})
+	}
+}
+
+func TestGetAllMembers(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+
+	members := []models.Member{
+		{
+			ID:          1,
+			FirstName:   "John",
+			LastName:    "Doe",
+			Email:       "John.Doe@gmail.com",
+			DateOfBirth: "1990-01-01",
+		},
+		{
+			ID:          2,
+			FirstName:   "Jane",
+			LastName:    "Smith",
+			Email:       "Jane.Smith@gmail.com",
+			DateOfBirth: "1985-05-05",
+		},
+	}
+
+	mockService := new(MockMemberService)
+	mockService.On("GetAllMembers", mock.Anything).Return(createResponse(http.StatusOK, members))
+
+	memberHandler := NewMemberHandler(router, mockService)
+	router.GET("/members", memberHandler.GetAllMembers)
+
+	request, _ := http.NewRequest(http.MethodGet, "/members", nil)
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, request)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Contains(t, w.Body.String(), "[{\"id\":1,\"firstName\":\"John\",\"lastName\":\"Doe\",\"email\":\"John.Doe@gmail.com\",\"dateOfBirth\":\"1990-01-01\"},{\"id\":2,\"firstName\":\"Jane\",\"lastName\":\"Smith\",\"email\":\"Jane.Smith@gmail.com\",\"dateOfBirth\":\"1985-05-05\"}]")
 }
 
 func createResponse(statusCode int, body any) models.Response {
@@ -73,22 +168,22 @@ func (m *MockMemberService) CreateMember(ctx context.Context, member *models.Mem
 	return args.Get(0).(models.Response)
 }
 
+func (m *MockMemberService) GetMemberById(ctx context.Context, memberId int) models.Response {
+	args := m.Called(ctx, memberId)
+	return args.Get(0).(models.Response)
+}
+
+func (m *MockMemberService) GetAllMembers(ctx context.Context) models.Response {
+	args := m.Called(ctx)
+	return args.Get(0).(models.Response)
+}
+
 // DeleteMemberById implements service.MemberServiceI.
 func (m *MockMemberService) DeleteMemberById(ctx context.Context, memberId int) models.Response {
 	panic("unimplemented")
 }
 
-// GetAllMembers implements service.MemberServiceI.
-func (m *MockMemberService) GetAllMembers(ctx context.Context) models.Response {
-	panic("unimplemented")
-}
-
-// GetMemberById implements service.MemberServiceI.
-func (m *MockMemberService) GetMemberById(ctx context.Context, memberId int) models.Response {
-	panic("unimplemented")
-}
-
 // UpdateMemberById implements service.MemberServiceI.
-func (m *MockMemberService) UpdateMemberById(ctx context.Context, member *models.Member, memberId int) models.Response {
+func (m *MockMemberService) UpdateMemberById(ctx context.Context, member *models.UpdateMember, memberId int) models.Response {
 	panic("unimplemented")
 }
