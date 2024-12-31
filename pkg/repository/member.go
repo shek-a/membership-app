@@ -38,7 +38,7 @@ func (m *MemberRepository) CreateMember(ctx context.Context, member *models.Memb
 
 func (m *MemberRepository) GetMemberById(ctx context.Context, memberId int) (*models.Member, error) {
 	var member models.Member
-	filter := bson.D{bson.E{Key: "ID", Value: memberId}}
+	filter := bson.D{bson.E{Key: "id", Value: memberId}}
 	err := m.mongoDb.Collection("members").FindOne(ctx, filter).Decode(&member)
 	return &member, err
 }
@@ -66,10 +66,10 @@ func (m *MemberRepository) UpdateMemberById(ctx context.Context, member *models.
 	filter := bson.M{"id": memberId}
 	update := bson.M{
 		"$set": bson.M{
-			"FirstName":   member.FirstName,
-			"LastName":    member.LastName,
-			"Email":       member.Email,
-			"DateOfBirth": member.DateOfBirth,
+			"firstname":   member.FirstName,
+			"lastname":    member.LastName,
+			"email":       member.Email,
+			"dateofbirth": member.DateOfBirth,
 		},
 	}
 
@@ -78,7 +78,7 @@ func (m *MemberRepository) UpdateMemberById(ctx context.Context, member *models.
 }
 
 func (m *MemberRepository) DeleteMemberById(ctx context.Context, memberId int) error {
-	filter := bson.M{"ID": memberId}
+	filter := bson.M{"id": memberId}
 	_, err := m.mongoDb.Collection("members").DeleteOne(ctx, filter)
 	if err != nil {
 		log.Println("error deleting member:", err)

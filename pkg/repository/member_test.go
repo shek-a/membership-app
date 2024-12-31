@@ -84,11 +84,11 @@ func TestGetMemberById(t *testing.T) {
 			name: "Success getting member by id",
 			mongoDbMock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateCursorResponse(1, "membership.members", mtest.FirstBatch, bson.D{
-					{Key: "ID", Value: member.ID},
-					{Key: "FirstName", Value: member.FirstName},
-					{Key: "LastName", Value: member.LastName},
-					{Key: "Email", Value: member.Email},
-					{Key: "DateOfBirth", Value: member.DateOfBirth},
+					{Key: "id", Value: member.ID},
+					{Key: "firstName", Value: member.FirstName},
+					{Key: "lastName", Value: member.LastName},
+					{Key: "email", Value: member.Email},
+					{Key: "dateOfBirth", Value: member.DateOfBirth},
 				}))
 			},
 			wantErr: false,
@@ -136,17 +136,17 @@ func TestGetAllMembers(t *testing.T) {
 			name: "Success getting all members",
 			mongoDbMock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateCursorResponse(2, "membership.members", mtest.FirstBatch, bson.D{
-					{Key: "ID", Value: 1},
-					{Key: "FirstName", Value: "John"},
-					{Key: "LastName", Value: "Doe"},
-					{Key: "Email", Value: "John.Doe@gmail.com"},
-					{Key: "DateOfBirth", Value: "1990-01-01"},
+					{Key: "id", Value: 1},
+					{Key: "firstName", Value: "John"},
+					{Key: "lastName", Value: "Doe"},
+					{Key: "email", Value: "John.Doe@gmail.com"},
+					{Key: "dateOfBirth", Value: "1990-01-01"},
 				}, bson.D{
-					{Key: "ID", Value: 2},
-					{Key: "FirstName", Value: "Jane"},
-					{Key: "LastName", Value: "Smith"},
-					{Key: "Email", Value: "Jane.Smith@gmail.com"},
-					{Key: "DateOfBirth", Value: "1985-05-05"},
+					{Key: "id", Value: 2},
+					{Key: "firstName", Value: "Jane"},
+					{Key: "lastName", Value: "Smith"},
+					{Key: "email", Value: "Jane.Smith@gmail.com"},
+					{Key: "dateOfBirth", Value: "1985-05-05"},
 				}))
 			},
 			wantErr: false,

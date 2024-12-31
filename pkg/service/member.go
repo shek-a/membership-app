@@ -86,9 +86,9 @@ func (m *MemberService) UpdateMemberById(ctx context.Context, member *models.Upd
 		return handleMemberFetchError(err, memberId)
 	}
 
-	fetchedMember = mergeFields(fetchedMember, member)
+	fetchedMember = mergeUpdateMemberFieldsToMemberFields(fetchedMember, member)
 
-	err = m.memberRepository.UpdateMemberById(ctx, member, memberId)
+	err = m.memberRepository.UpdateMemberById(ctx, mergeMemberFieldsToUpdateMemberFields(fetchedMember, member), memberId)
 	if err != nil {
 		return createErrorResponse(http.StatusInternalServerError, "Error updating member")
 	}
@@ -111,7 +111,7 @@ func (m *MemberService) DeleteMemberById(ctx context.Context, memberId int) mode
 	return createSuccessResponse(http.StatusOK, fmt.Sprintf("Member %d deleted", memberId))
 }
 
-func mergeFields(member *models.Member, updateMember *models.UpdateMember) *models.Member {
+func mergeUpdateMemberFieldsToMemberFields(member *models.Member, updateMember *models.UpdateMember) *models.Member {
 	if updateMember.FirstName != "" {
 		member.FirstName = updateMember.FirstName
 	}
@@ -128,6 +128,25 @@ func mergeFields(member *models.Member, updateMember *models.UpdateMember) *mode
 		member.DateOfBirth = updateMember.DateOfBirth
 	}
 	return member
+}
+
+func mergeMemberFieldsToUpdateMemberFields(member *models.Member, updateMember *models.UpdateMember) *models.UpdateMember {
+	if updateMember.FirstName == "" {
+		updateMember.FirstName = member.FirstName
+	}
+
+	if updateMember.LastName == "" {
+		updateMember.LastName = member.LastName
+	}
+
+	if updateMember.Email == "" {
+		updateMember.Email = member.Email
+	}
+
+	if updateMember.DateOfBirth == "" {
+		updateMember.DateOfBirth = member.DateOfBirth
+	}
+	return updateMember
 }
 
 func handleMemberFetchError(err error, memberId int) models.Response {
