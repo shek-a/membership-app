@@ -1,0 +1,33 @@
+# Binaries
+main
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Vendor directory
+vendor/
+
+# Go test binaries
+*.test
+
+# IDE/editor directories and files
+.vscode/
+.idea/
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Git
+.git
+.gitignore
+
+# Dockerfile and .dockerignore (optional)
+Dockerfile
+docker-compose.yaml
+.dockerignore

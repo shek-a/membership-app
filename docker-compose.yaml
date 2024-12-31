@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  membership-app:
+    image: memberapp:latest
+    container_name: membership-app
+    build:
+      context: .
+      dockerfile: Dockerfile    
+    environment:
+      - MONGODB_URI=mongodb://mongo-db:27017
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo-db
+
+  mongo-db:
+    image: mongo:latest
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
