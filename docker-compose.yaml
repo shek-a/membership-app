@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   membership-app:
-    image: memberapp:latest
+    image: membership-app:latest
     container_name: membership-app
     build:
       context: .
