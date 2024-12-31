@@ -1,6 +1,6 @@
 # Membership App
 
-This is a Membership App built with Go. The application allows users to manage memberships via a REST API.
+This is a Membership Application built with Go. The application allows users to manage memberships via a REST API.
 
 ## Prerequisites
 You need the following installed to run the application locally:
@@ -29,7 +29,7 @@ The application stores data in a MongoDB database, so you will need a MongoDB in
 
 
 ## Running the Application with Docker
-As an alternative to running the application locally, you can run the app using Docker. This method ensures that all dependencies and configurations are handled within Docker containers.
+As an alternative to running the application locally, you can run the application using Docker. This method ensures that all dependencies and configurations are handled within Docker containers.
 
 1. **Build and start the Application in Docker**
 
