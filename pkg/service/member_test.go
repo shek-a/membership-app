@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,7 +39,7 @@ func TestCreateMember(t *testing.T) {
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("CreateMember", ctx, member).Return(nil)
 			},
-			expectedStatusCode: 201,
+			expectedStatusCode: http.StatusCreated,
 			expectedBody:       member,
 		},
 		{
@@ -47,7 +48,7 @@ func TestCreateMember(t *testing.T) {
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("CreateMember", ctx, member).Return(errors.New("repository error"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode: http.StatusInternalServerError,
 			expectedBody:       models.ErrorMessage{Error: "Error creating member"},
 		},
 		{
@@ -60,7 +61,7 @@ func TestCreateMember(t *testing.T) {
 			},
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 			},
-			expectedStatusCode: 400,
+			expectedStatusCode: http.StatusBadRequest,
 			expectedBody:       models.ErrorMessage{Error: "Invalid email"},
 		},
 		{
@@ -73,7 +74,7 @@ func TestCreateMember(t *testing.T) {
 			},
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 			},
-			expectedStatusCode: 400,
+			expectedStatusCode: http.StatusBadRequest,
 			expectedBody:       models.ErrorMessage{Error: "Invalid date of birth"},
 		},
 	}
@@ -117,7 +118,7 @@ func TestGetMemberById(t *testing.T) {
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(member, nil)
 			},
-			expectedStatusCode: 200,
+			expectedStatusCode: http.StatusOK,
 			expectedBody:       member,
 		},
 		{
@@ -125,7 +126,7 @@ func TestGetMemberById(t *testing.T) {
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(nil, mongo.ErrNoDocuments)
 			},
-			expectedStatusCode: 404,
+			expectedStatusCode: http.StatusNotFound,
 			expectedBody:       models.ErrorMessage{Error: "Member 1 not found"},
 		},
 		{
@@ -133,7 +134,7 @@ func TestGetMemberById(t *testing.T) {
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(nil, errors.New("repository error"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode: http.StatusInternalServerError,
 			expectedBody:       models.ErrorMessage{Error: "Error fetching member"},
 		},
 	}
@@ -185,7 +186,7 @@ func TestGetAllMembers(t *testing.T) {
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetAllMembers", ctx).Return(members, nil)
 			},
-			expectedStatusCode: 200,
+			expectedStatusCode: http.StatusOK,
 			expectedBody:       members,
 		},
 		{
@@ -193,7 +194,7 @@ func TestGetAllMembers(t *testing.T) {
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetAllMembers", ctx).Return(nil, errors.New("repository error"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode: http.StatusInternalServerError,
 			expectedBody:       models.ErrorMessage{Error: "Error fetching members"},
 		},
 	}
@@ -245,7 +246,7 @@ func TestUpdateMemberById(t *testing.T) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(member, nil)
 				mockRepo.On("UpdateMemberById", ctx, updateMember, memberId).Return(nil)
 			},
-			expectedStatusCode: 200,
+			expectedStatusCode: http.StatusOK,
 			wantErr:            false,
 		},
 		{
@@ -254,7 +255,7 @@ func TestUpdateMemberById(t *testing.T) {
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(nil, mongo.ErrNoDocuments)
 			},
-			expectedStatusCode: 404,
+			expectedStatusCode: http.StatusNotFound,
 			expectedBody:       models.ErrorMessage{Error: "Member 1 not found"},
 			wantErr:            true,
 		},
@@ -264,7 +265,7 @@ func TestUpdateMemberById(t *testing.T) {
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(nil, errors.New("repository error"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode: http.StatusInternalServerError,
 			expectedBody:       models.ErrorMessage{Error: "Error fetching member"},
 			wantErr:            true,
 		},
@@ -275,7 +276,7 @@ func TestUpdateMemberById(t *testing.T) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(member, nil)
 				mockRepo.On("UpdateMemberById", ctx, updateMember, memberId).Return(errors.New("repository error"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode: http.StatusInternalServerError,
 			expectedBody:       models.ErrorMessage{Error: "Error updating member"},
 			wantErr:            true,
 		},
@@ -286,7 +287,7 @@ func TestUpdateMemberById(t *testing.T) {
 			},
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 			},
-			expectedStatusCode: 400,
+			expectedStatusCode: http.StatusBadRequest,
 			expectedBody:       models.ErrorMessage{Error: "Invalid email"},
 			wantErr:            true,
 		},
@@ -297,7 +298,7 @@ func TestUpdateMemberById(t *testing.T) {
 			},
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 			},
-			expectedStatusCode: 400,
+			expectedStatusCode: http.StatusBadRequest,
 			expectedBody:       models.ErrorMessage{Error: "Invalid date of birth"},
 			wantErr:            true,
 		},
@@ -352,15 +353,15 @@ func TestDeleteMemberById(t *testing.T) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(member, nil)
 				mockRepo.On("DeleteMemberById", ctx, memberId).Return(nil)
 			},
-			expectedStatusCode: 204,
-			expectedBody:       nil,
+			expectedStatusCode: http.StatusOK,
+			expectedBody:       models.SuccessMessage{Message: "Member 1 deleted"},
 		},
 		{
 			name: "Member is not found",
 			memberRepoMock: func(ctx context.Context, mockRepo *MockMemberRepository) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(nil, mongo.ErrNoDocuments)
 			},
-			expectedStatusCode: 404,
+			expectedStatusCode: http.StatusNotFound,
 			expectedBody:       models.ErrorMessage{Error: "Member 1 not found"},
 		},
 		{
@@ -369,7 +370,7 @@ func TestDeleteMemberById(t *testing.T) {
 				mockRepo.On("GetMemberById", ctx, memberId).Return(member, nil)
 				mockRepo.On("DeleteMemberById", ctx, memberId).Return(errors.New("repository error"))
 			},
-			expectedStatusCode: 500,
+			expectedStatusCode: http.StatusInternalServerError,
 			expectedBody:       models.ErrorMessage{Error: "Could not delete Member 1"},
 		},
 	}

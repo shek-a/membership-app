@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"members.com/membership/pkg/models"
@@ -32,19 +33,19 @@ func (m *MemberService) CreateMember(ctx context.Context, member *models.Member)
 	member.ID = utils.GenerateRandomNumber()
 
 	if !utils.IsValidEmail(member.Email) {
-		return createErrorResponse(400, "Invalid email")
+		return createErrorResponse(http.StatusBadRequest, "Invalid email")
 	}
 
 	if !utils.IsValidDate(member.DateOfBirth) {
-		return createErrorResponse(400, "Invalid date of birth")
+		return createErrorResponse(http.StatusBadRequest, "Invalid date of birth")
 	}
 
 	err := m.memberRepository.CreateMember(ctx, member)
 	if err != nil {
-		return createErrorResponse(500, "Error creating member")
+		return createErrorResponse(http.StatusInternalServerError, "Error creating member")
 	}
 	return models.Response{
-		StatusCode: 201,
+		StatusCode: http.StatusCreated,
 		Body:       member,
 	}
 }
@@ -55,7 +56,7 @@ func (m *MemberService) GetMemberById(ctx context.Context, memberId int) models.
 		return handleMemberFetchError(err, memberId)
 	}
 	return models.Response{
-		StatusCode: 200,
+		StatusCode: http.StatusOK,
 		Body:       member,
 	}
 }
@@ -63,21 +64,21 @@ func (m *MemberService) GetMemberById(ctx context.Context, memberId int) models.
 func (m *MemberService) GetAllMembers(ctx context.Context) models.Response {
 	members, err := m.memberRepository.GetAllMembers(ctx)
 	if err != nil {
-		return createErrorResponse(500, "Error fetching members")
+		return createErrorResponse(http.StatusInternalServerError, "Error fetching members")
 	}
 	return models.Response{
-		StatusCode: 200,
+		StatusCode: http.StatusOK,
 		Body:       members,
 	}
 }
 
 func (m *MemberService) UpdateMemberById(ctx context.Context, member *models.UpdateMember, memberId int) models.Response {
 	if member.Email != "" && !utils.IsValidEmail(member.Email) {
-		return createErrorResponse(400, "Invalid email")
+		return createErrorResponse(http.StatusBadRequest, "Invalid email")
 	}
 
 	if member.DateOfBirth != "" && !utils.IsValidDate(member.DateOfBirth) {
-		return createErrorResponse(400, "Invalid date of birth")
+		return createErrorResponse(http.StatusBadRequest, "Invalid date of birth")
 	}
 
 	fetchedMember, err := m.memberRepository.GetMemberById(ctx, memberId)
@@ -89,10 +90,10 @@ func (m *MemberService) UpdateMemberById(ctx context.Context, member *models.Upd
 
 	err = m.memberRepository.UpdateMemberById(ctx, member, memberId)
 	if err != nil {
-		return createErrorResponse(500, "Error updating member")
+		return createErrorResponse(http.StatusInternalServerError, "Error updating member")
 	}
 	return models.Response{
-		StatusCode: 200,
+		StatusCode: http.StatusOK,
 		Body:       fetchedMember,
 	}
 }
@@ -105,11 +106,9 @@ func (m *MemberService) DeleteMemberById(ctx context.Context, memberId int) mode
 
 	err = m.memberRepository.DeleteMemberById(ctx, memberId)
 	if err != nil {
-		return createErrorResponse(500, fmt.Sprintf("Could not delete Member %d", memberId))
+		return createErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Could not delete Member %d", memberId))
 	}
-	return models.Response{
-		StatusCode: 204,
-	}
+	return createSuccessResponse(http.StatusOK, fmt.Sprintf("Member %d deleted", memberId))
 }
 
 func mergeFields(member *models.Member, updateMember *models.UpdateMember) *models.Member {
@@ -133,9 +132,18 @@ func mergeFields(member *models.Member, updateMember *models.UpdateMember) *mode
 
 func handleMemberFetchError(err error, memberId int) models.Response {
 	if err == mongo.ErrNoDocuments {
-		return createErrorResponse(404, fmt.Sprintf("Member %d not found", memberId))
+		return createErrorResponse(http.StatusNotFound, fmt.Sprintf("Member %d not found", memberId))
 	}
-	return createErrorResponse(500, "Error fetching member")
+	return createErrorResponse(http.StatusInternalServerError, "Error fetching member")
+}
+
+func createSuccessResponse(statusCode int, successMessage string) models.Response {
+	return models.Response{
+		StatusCode: statusCode,
+		Body: models.SuccessMessage{
+			Message: successMessage,
+		},
+	}
 }
 
 func createErrorResponse(statusCode int, errorMessage string) models.Response {
